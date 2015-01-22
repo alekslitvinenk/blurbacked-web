@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Blur Backed: webtool for fixing videos filmed in portrait mode</title>
+<style>
+#div1 {width:350px;height:70px;padding:10px;border:1px solid #aaaaaa;}
+</style>
+<script>
+function allowDrop(ev) {
+    ev.preventDefault();
+}
+
+function drop(ev) {
+   ev.preventDefault();
+   var data = ev.dataTransfer;
+
+   if(data.files && data.files.length)
+   {
+   	   var f = data.files[0];
+
+	   var fr = new FileReader();
+
+	   fr.onload = function()
+	   {
+            try
+            {
+	   		  var flash = document.getElementById("Main");
+	   		  flash.process_file(fr.result);
+
+              var status = document.getElementById("info");
+              status.innerHTML = fr.result;
+            }catch(e)
+            {
+
+            }
+	   }
+
+	   fr.readAsDataURL(f);
+   }
+}
+</script>
+<script type="text/javascript" src="swfobject.js"></script>
+        <script type="text/javascript">
+            // For version detection, set to min. required Flash Player version, or 0 (or 0.0.0), for no version detection. 
+            var swfVersionStr = "11.1.0";
+            // To use express install, set to playerProductInstall.swf, otherwise the empty string. 
+            var xiSwfUrlStr = "playerProductInstall.swf";
+            var flashvars = {};
+            var params = {};
+            params.quality = "high";
+            params.bgcolor = "#ffffff";
+            params.allowscriptaccess = "always";
+            params.allowfullscreen = "true";
+            var attributes = {};
+            attributes.id = "Main";
+            attributes.name = "Main";
+            attributes.align = "middle";
+            swfobject.embedSWF(
+                "Main.swf", "flashContent", 
+                "100%", "100%", 
+                swfVersionStr, xiSwfUrlStr, 
+                flashvars, params, attributes);
+            // JavaScript enabled so display the flashContent div in case it is not replaced with a swf object.
+            swfobject.createCSS("#flashContent", "display:block;text-align:left;");
+        </script>
+</head>
+<body>
+
+<div id="div1" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+<p id="info">
+File props
+</p>
+
+<div id="flashContent">
+    <p>
+        To view this page ensure that Adobe Flash Player version 
+        11.1.0 or greater is installed. 
+    </p>
+    <script type="text/javascript"> 
+        var pageHost = ((document.location.protocol == "https:") ? "https://" : "http://"); 
+        document.write("<a href='http://www.adobe.com/go/getflashplayer'><img src='" 
+                        + pageHost + "www.adobe.com/images/shared/download_buttons/get_flash_player.gif' alt='Get Adobe Flash player' /></a>" ); 
+    </script> 
+</div>
+
+</body>
+</html>
