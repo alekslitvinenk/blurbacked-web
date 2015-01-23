@@ -6,6 +6,28 @@
 #div1 {width:350px;height:70px;padding:10px;border:1px solid #aaaaaa;}
 </style>
 <script>
+var worker = new Worker("worker.js");
+
+worker.onmessage = function(ev)
+{
+    var status = document.getElementById("info");
+    status.innerHTML += "<p>" + ev.data.data + "</p>";
+
+    var message = event.data;
+
+    /*if(message.type == "done")
+    {
+        var a = document.createElement('a');
+      a.download = "test.mp4";
+      var blob = new Blob([message.data]);
+      var src = window.URL.createObjectURL(blob);
+      a.href = src;
+      a.textContent = 'Click here to download ' + "test.mp4" + "!";
+
+      document.body.appendChild(a);
+    }*/
+}
+
 function allowDrop(ev) {
     ev.preventDefault();
 }
@@ -22,20 +44,18 @@ function drop(ev) {
 
 	   fr.onload = function()
 	   {
-            try
-            {
-	   		  var flash = document.getElementById("Main");
-	   		  flash.process_file(fr.result);
+            var sampleData = new Uint8Array(fr.result);
 
-              var status = document.getElementById("info");
-              status.innerHTML = fr.result;
-            }catch(e)
-            {
+            var status = document.getElementById("info");
+            status.innerHTML = f.name + " set binary";
 
-            }
+            var modul = {arguments: ["-i", f.name, "-vf", "boxblur=10:1", "-acodec", "copy", "test.mp4"],
+                        files: [{data: sampleData, name: f.name}]};
+
+            worker.postMessage({type: "command", arguments: ["-help"]});
 	   }
 
-	   fr.readAsDataURL(f);
+	   fr.readAsArrayBuffer(f);
    }
 }
 </script>
@@ -68,9 +88,9 @@ function drop(ev) {
 
 <div id="div1" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
 
-<p id="info">
-File props
-</p>
+<div id="info">
+<p>File props</p>
+</div>
 
 <div id="flashContent">
     <p>
