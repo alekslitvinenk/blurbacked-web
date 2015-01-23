@@ -10,22 +10,34 @@ var worker = new Worker("worker.js");
 
 worker.onmessage = function(ev)
 {
-    var status = document.getElementById("info");
-    status.innerHTML += "<p>" + ev.data.data + "</p>";
-
     var message = event.data;
 
-    /*if(message.type == "done")
-    {
-        var a = document.createElement('a');
-      a.download = "test.mp4";
-      var blob = new Blob([message.data]);
-      var src = window.URL.createObjectURL(blob);
-      a.href = src;
-      a.textContent = 'Click here to download ' + "test.mp4" + "!";
+    var status = document.getElementById("info");
 
-      document.body.appendChild(a);
-    }*/
+    if(message.type == "stdout")
+    {
+        status.innerHTML += "<p>" + message.data + "</p>";
+    }else
+    {
+        status.innerHTML += "<p>" + message.type + "</p>";
+    }
+
+    if(message.type == "done")
+    {
+      makeFileDownload(message.data[0].data, "test.mp4");
+    }
+}
+
+function makeFileDownload(fileData, fileName)
+{
+    var a = document.createElement('a');
+    a.download = "test.mp4";
+    var blob = new Blob([fileData]);
+    var src = window.URL.createObjectURL(blob);
+    a.href = src;
+    a.textContent = 'Click here to download ' + "test.mp4" + "!";
+
+    document.body.appendChild(a);
 }
 
 function allowDrop(ev) {
@@ -44,15 +56,17 @@ function drop(ev) {
 
 	   fr.onload = function()
 	   {
-            var sampleData = new Uint8Array(fr.result);
+            /*var sampleData = new Uint8Array(fr.result);
 
             var status = document.getElementById("info");
-            status.innerHTML = f.name + " set binary";
 
-            var modul = {arguments: ["-i", f.name, "-vf", "boxblur=10:1", "-acodec", "copy", "test.mp4"],
+            var module = {arguments: ["-i", f.name, "-vf", "unsharp", "-acodec", "copy", "test.mp4"],
                         files: [{data: sampleData, name: f.name}]};
 
-            worker.postMessage({type: "command", arguments: ["-help"]});
+            //worker.postMessage({type: "command", arguments: ["-help"]});
+            worker.postMessage(module);*/
+
+            makeFileDownload(fr.result, "test.mp4");
 	   }
 
 	   fr.readAsArrayBuffer(f);
