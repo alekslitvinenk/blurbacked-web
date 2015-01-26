@@ -5,6 +5,8 @@
 <style>
 #div1 {width:350px;height:70px;padding:10px;border:1px solid #aaaaaa;}
 </style>
+<script type="text/javascript" src="swfobject.js"></script>
+<script type="text/javascript" src="downloadify.min.js"></script>
 <script>
 var worker = new Worker("worker.js");
 
@@ -30,19 +32,32 @@ worker.onmessage = function(ev)
 
 function makeFileDownload(fileData, fileName)
 {
-    var a = document.createElement('a');
-    a.download = "test.mp4";
-    var blob = new Blob([fileData]);
-    var src = window.URL.createObjectURL(blob);
-    a.href = src;
-    a.textContent = 'Click here to download ' + "test.mp4" + "!";
+    var p = document.createElement('p');
+    p.id = "downloadify";
 
-    document.body.appendChild(a);
-}
+    document.body.appendChild(p);
 
-function allowDrop(ev) {
-    ev.preventDefault();
-}
+    Downloadify.create('downloadify',{
+                    filename: fileName,
+                    data: function(){ 
+                        return base64ArrayBuffer(fileData);
+                    },
+                    dataType: "base64",
+                    onComplete: function(){ alert('Your File Has Been Saved!'); },
+                    onCancel: function(){ alert('You have cancelled the saving of this file.'); },
+                    onError: function(){ alert('You must put something in the File Contents or there will be nothing to save!'); },
+                    swf: 'downloadify.swf',
+                    downloadImage: 'download.png',
+                    width: 100,
+                    height: 30,
+                    transparent: true,
+                    append: false
+                });
+    }
+
+    function allowDrop(ev) {
+        ev.preventDefault();
+    }
 
 function drop(ev) {
    ev.preventDefault();
@@ -56,47 +71,75 @@ function drop(ev) {
 
 	   fr.onload = function()
 	   {
-            /*var sampleData = new Uint8Array(fr.result);
+            var sampleData = new Uint8Array(fr.result);
 
             var status = document.getElementById("info");
 
-            var module = {arguments: ["-i", f.name, "-vf", "unsharp", "-acodec", "copy", "test.mp4"],
+            var module = {arguments: ["-i", f.name, "-acodec", "copy", "test.webm"],
                         files: [{data: sampleData, name: f.name}]};
 
             //worker.postMessage({type: "command", arguments: ["-help"]});
-            worker.postMessage(module);*/
+            worker.postMessage(module);
 
-            makeFileDownload(fr.result, "test.mp4");
+            //makeFileDownload(fr.result, "test.mp4");
 	   }
 
 	   fr.readAsArrayBuffer(f);
    }
 }
+
+function base64ArrayBuffer(arrayBuffer) {
+  var base64    = ''
+  var encodings = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+ 
+  var bytes         = new Uint8Array(arrayBuffer)
+  var byteLength    = bytes.byteLength
+  var byteRemainder = byteLength % 3
+  var mainLength    = byteLength - byteRemainder
+ 
+  var a, b, c, d
+  var chunk
+ 
+  // Main loop deals with bytes in chunks of 3
+  for (var i = 0; i < mainLength; i = i + 3) {
+    // Combine the three bytes into a single integer
+    chunk = (bytes[i] << 16) | (bytes[i + 1] << 8) | bytes[i + 2]
+ 
+    // Use bitmasks to extract 6-bit segments from the triplet
+    a = (chunk & 16515072) >> 18 // 16515072 = (2^6 - 1) << 18
+    b = (chunk & 258048)   >> 12 // 258048   = (2^6 - 1) << 12
+    c = (chunk & 4032)     >>  6 // 4032     = (2^6 - 1) << 6
+    d = chunk & 63               // 63       = 2^6 - 1
+ 
+    // Convert the raw binary segments to the appropriate ASCII encoding
+    base64 += encodings[a] + encodings[b] + encodings[c] + encodings[d]
+  }
+ 
+  // Deal with the remaining bytes and padding
+  if (byteRemainder == 1) {
+    chunk = bytes[mainLength]
+ 
+    a = (chunk & 252) >> 2 // 252 = (2^6 - 1) << 2
+ 
+    // Set the 4 least significant bits to zero
+    b = (chunk & 3)   << 4 // 3   = 2^2 - 1
+ 
+    base64 += encodings[a] + encodings[b] + '=='
+  } else if (byteRemainder == 2) {
+    chunk = (bytes[mainLength] << 8) | bytes[mainLength + 1]
+ 
+    a = (chunk & 64512) >> 10 // 64512 = (2^6 - 1) << 10
+    b = (chunk & 1008)  >>  4 // 1008  = (2^6 - 1) << 4
+ 
+    // Set the 2 least significant bits to zero
+    c = (chunk & 15)    <<  2 // 15    = 2^4 - 1
+ 
+    base64 += encodings[a] + encodings[b] + encodings[c] + '='
+  }
+  
+  return base64
+}
 </script>
-<script type="text/javascript" src="swfobject.js"></script>
-        <script type="text/javascript">
-            // For version detection, set to min. required Flash Player version, or 0 (or 0.0.0), for no version detection. 
-            var swfVersionStr = "11.1.0";
-            // To use express install, set to playerProductInstall.swf, otherwise the empty string. 
-            var xiSwfUrlStr = "playerProductInstall.swf";
-            var flashvars = {};
-            var params = {};
-            params.quality = "high";
-            params.bgcolor = "#ffffff";
-            params.allowscriptaccess = "always";
-            params.allowfullscreen = "true";
-            var attributes = {};
-            attributes.id = "Main";
-            attributes.name = "Main";
-            attributes.align = "middle";
-            swfobject.embedSWF(
-                "Main.swf", "flashContent", 
-                "100%", "100%", 
-                swfVersionStr, xiSwfUrlStr, 
-                flashvars, params, attributes);
-            // JavaScript enabled so display the flashContent div in case it is not replaced with a swf object.
-            swfobject.createCSS("#flashContent", "display:block;text-align:left;");
-        </script>
 </head>
 <body>
 
@@ -104,18 +147,6 @@ function drop(ev) {
 
 <div id="info">
 <p>File props</p>
-</div>
-
-<div id="flashContent">
-    <p>
-        To view this page ensure that Adobe Flash Player version 
-        11.1.0 or greater is installed. 
-    </p>
-    <script type="text/javascript"> 
-        var pageHost = ((document.location.protocol == "https:") ? "https://" : "http://"); 
-        document.write("<a href='http://www.adobe.com/go/getflashplayer'><img src='" 
-                        + pageHost + "www.adobe.com/images/shared/download_buttons/get_flash_player.gif' alt='Get Adobe Flash player' /></a>" ); 
-    </script> 
 </div>
 
 </body>
