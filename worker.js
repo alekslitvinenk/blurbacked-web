@@ -12,7 +12,8 @@ onmessage = function(event) {
     files: event.data.files || [],
     arguments: event.data.arguments || [],
     print: print,
-    printErr: print
+    printErr: print,
+    TOTAL_MEMORY: 33554432 * 30
   };
   postMessage({
     'type' : 'start',
