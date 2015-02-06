@@ -78,7 +78,7 @@ function drop(ev) {
             var module = {arguments: ["-i", f.name, "-vf", "unsharp", "-acodec", "copy", "test.mp4"],
                         files: [{data: sampleData, name: f.name}]};
 
-            //worker.postMessage({type: "command", arguments: ["-help"]});
+            //worker.postMessage({type: "command", arguments: ["-codecs"]});
             worker.postMessage(module);
 
             //makeFileDownload(fr.result, "test.mp4");

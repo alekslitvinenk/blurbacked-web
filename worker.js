@@ -1,4 +1,4 @@
-importScripts('ffmpeg.js');
+importScripts('ffmpeg-all-codecs.js');
 
 function print(text) {
   postMessage({
